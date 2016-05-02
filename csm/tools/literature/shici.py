@@ -63,13 +63,13 @@ class shiciAnalysis(object):
         self.txtCP = ''
         for i in content:
             self.arrY.append(yunbu4sentence(i))
-            self.arrGL.append(map(yun2pz, self.arrYS[-1]))
-        
             line = []
             for c in xrange(0,len(i),3):
                 line.append(i[c:c+3])
             self.arrZ.append(line)
-    
+        
+            self.arrGL.append(map(yun2pz, self.arrY[-1]))
+        
         self.subtitle, self.yunBu = '', ''
         self.arrGS, self.bestGS = None, None
         if cipai is None:
@@ -163,6 +163,7 @@ class shiciAnalysis(object):
                 pass
             elif idx < len(self.arrGL[line]) and self.arrGL[line][idx] != f:
                 mistake += 1
+                print idx, len(self.arrGL[line]), self.arrGL[line][idx], f
                 print '\t“%s”字声%s,平仄不合'%(self.arrZ[line][idx], '平'if self.arrGL[line][idx]=='_'else'仄')
             idx += 1
         mistake += abs(len(self.arrZ[line])-idx)

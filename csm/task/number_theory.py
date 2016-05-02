@@ -13,15 +13,22 @@ def isPrime(n):
     return True
 
 def prime(n):
-    arr = [2]
-    k = 1
-    while n > len(arr):
+    arr = [2]*(n+1)
+    k, i = 1, 1
+    while i < n:
         k += 2
-        while not isPrime(k):
-            k += 2
-        arr.append(k)
-    print arr
-    return k
+        ksr = int(math.sqrt(k))+1
+        isp = True
+        for c in arr[:i]:
+            if k % c == 0:
+                isp = False
+                break
+            if ksr < c:
+                break
+        if isp:
+            arr[i] = k
+            i+=1
+    return arr[i-1]
 
 if __name__ == '__main__':
     print prime(98)
