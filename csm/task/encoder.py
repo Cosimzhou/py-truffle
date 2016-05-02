@@ -22,13 +22,22 @@ if __name__ == '__main__':
     if args.output:            
         strout = open(args.output, 'w')
         
-    for l in strin.readlines():
-        try:
-            ll = l.decode(args.sourceCode).encode(args.destCode)
-        except UnicodeDecodeError as e:
-            strerr.write('this line occurred convert error!\n')
-            continue
-        strout.write(ll)
+    if args.sourceCode.lower()=='unicode':
+        for l in strin.readlines():
+            try:
+                ll = l.encode(args.destCode)
+            except UnicodeDecodeError as e:
+                strerr.write('this line occurred convert error!\n')
+                continue
+            strout.write(ll)
+    else:
+        for l in strin.readlines():
+            try:
+                ll = l.decode(args.sourceCode).encode(args.destCode)
+            except UnicodeDecodeError as e:
+                strerr.write('this line occurred convert error!\n')
+                continue
+            strout.write(ll)
         
     strin.close()
                 
