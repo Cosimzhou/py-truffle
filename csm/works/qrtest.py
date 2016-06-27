@@ -1,5 +1,5 @@
 #! /usr/bin/python
-# coding: utf-8
+# -*- coding: utf-8 -*-
 '''
 Created on 2014年7月22日
 
@@ -7,7 +7,10 @@ Created on 2014年7月22日
 '''
 
 import random
-# from PIL import Image, ImageDraw
+try:
+    import Image, ImageDraw
+except ImportError as e:
+    from PIL import Image, ImageDraw
 
 
 INF = float('inf')
@@ -16,7 +19,7 @@ NBP, BBP = -1,0#False, True
 BPARR=(BBP, NBP)
 
 dataCoding = 'utf-8'
-outputDir = '/home/zhouzhichao/2dpic'
+outputDir = '/Users/zhouzhichao/tmp/2dpic'
 
 def xbin(value, bit=0):
 #    return "%%0%dd"%bit%int(bin(value)[2:])
@@ -640,11 +643,9 @@ class QR_Coder(QR_Master):
         self.mask      = 0
     def changeQuality(self, qua):
         if type(qua) is str and len(qua):
-            qua = qua.upper()
-            if qua in 'LMQH':
-                qua = {'L':1,'M':0,'H':2,'Q':3}[qua]
-            else:
-                return 
+            qua = qua.upper()[0]
+            if qua not in 'LMQH': return
+            qua = {'L':1,'M':0,'H':2,'Q':3}[qua] 
         self.quality   = qua % 4
     def changeMask(self, mask):
         self.mask      = mask % 8
@@ -672,19 +673,16 @@ class QR_Coder(QR_Master):
             print ''.join(map(lambda x: CHARB if x else CHARN, i))
     def outputMatrixPicture(self, path, unit):
         if self.error or not self.matrix: return
-        from csm.svg.SVGGen import svgGraph as SVG 
-        svg = SVG()
-        svg.docname = path
-        svg.rect()
-#         img = Image.new("RGB", (self.size*unit,self.size*unit), 0xFFFFFF)
-#         draw= ImageDraw.Draw(img)
-#         for i in xrange(self.size):
-#             for j in xrange(self.size):
-# #                 if self.matrix[j][i] == BBP:
-#                 draw.rectangle(((i*unit,j*unit),((i+1)*unit,(j+1)*unit)), self.matrix[j][i])
-#         img.save(path)        
-        
-
+#         from csm.svg.SVGGen import svgGraph as SVG 
+#         svg = SVG()
+#         svg.docname = path
+#         svg.rect()
+        img = Image.new("RGB", (self.size*unit,self.size*unit), 0xFFFFFF)
+        draw= ImageDraw.Draw(img)
+        for i in xrange(self.size):
+            for j in xrange(self.size):
+                draw.rectangle(((i*unit,j*unit),((i+1)*unit,(j+1)*unit)), self.matrix[j][i])
+        img.save(path)
     def versionToSize(self):
         if 1 <= self.version <= 40:
             self.size = self.version*4+17
@@ -770,10 +768,7 @@ class QR_Coder(QR_Master):
                     y += ydir
                     x += 1
                     if not (0 <= y <self.size):
-                        if y < 0:
-                            ydir, y =  1, 0
-                        else:
-                            ydir, y = -1, self.size-1
+                        ydir, y = (1, 0) if y < 0 else (-1, self.size-1)
                         column -= 2
                         if column == 5: column = 4
                         x = column+1
@@ -1024,11 +1019,11 @@ class QR_Coder(QR_Master):
                 score[2] *= N[3]            
             total += sum(score)
     
-        for i in xrange(self.size-1):
-            for j in xrange(self.size-1):
-                if self.matrix[i][j] == self.matrix[i][j+1] and self.matrix[i][j] == self.matrix[i+1][j+1] and self.matrix[i][j] == self.matrix[i+1][j]:
-                    #find one
-                    pass
+#         for i in xrange(self.size-1):
+#             for j in xrange(self.size-1):
+#                 if self.matrix[i][j] == self.matrix[i][j+1] and self.matrix[i][j] == self.matrix[i+1][j+1] and self.matrix[i][j] == self.matrix[i+1][j]:
+#                     #find one
+#                     pass
                    
         total += sum(score)        
         return total
@@ -1142,12 +1137,12 @@ def simpleQREncode(data, **kwargs):
     
     
 if __name__ == '__main__': 
-#     raw = '514541325154574564564856421646265959644864643'   
-#     simpleQREncode(raw)
+    raw = '514541325154574564564856421646265959644864643'   
+    simpleQREncode(raw)
 
 
-#     drawBlockColor(16, 4)
-#     drawMaskCode(13, 4)
+    drawBlockColor(16, 4)
+    drawMaskCode(13, 4)
 
 
     for i in xrange(8):

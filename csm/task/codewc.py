@@ -5,7 +5,7 @@
 """
 import os, sys
 import argparse
-sourceTypeSet = set(('c', 'h', 'm', 'mm', 'py', 'sh'))
+sourceTypeSet = set(('c', 'cpp', 'cc', 'hpp', 'h', 'm', 'mm', 'py', 'sh', 'java'))
 args = None
 
 def fileLineNum(file_name):
