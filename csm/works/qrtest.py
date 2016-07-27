@@ -656,6 +656,12 @@ class QR_Coder(QR_Master):
         if ver_qua and len(ver_qua) == 2:
             self.changeVersion(ver_qua[0])
             self.changeQuality(ver_qua[1])
+    def __repr__(self):
+        buf = ''
+        if self.matrix:
+            for i in self.matrix:
+                buf += ''.join(map(lambda x:'#'if x==BBP else'_',i))+'\n'
+        return buf 
     def checkCodeLength(self):
         return super(QR_Coder, self).checkCodeLength(self.version, self.quality)
     def dataCaps(self):
@@ -1090,6 +1096,7 @@ def simpleQREncode(data, **kwargs):
             break
         qrd.shiftVersion(vdiff)
           
+    
     prdata = qrd.encodeData(data)
   
       
@@ -1120,6 +1127,7 @@ def simpleQREncode(data, **kwargs):
           
     print 'Best index: %s, %s'%(minmask, minscore)
     
+    print qrc
     
     info = qrc.getInfo(qrc.version, qrc.quality)
     for key in info:
