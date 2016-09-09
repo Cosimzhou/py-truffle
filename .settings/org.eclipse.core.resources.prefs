@@ -35,6 +35,7 @@ encoding//csm/task/pingshuiyun.py=UTF-8
 encoding//csm/test.py=utf-8
 encoding//csm/testBeverage.py=utf-8
 encoding//csm/testConst.py=utf-8
+encoding//csm/testPIL.py=utf-8
 encoding//csm/testXML.py=utf-8
 encoding//csm/tools/geotool/geo.py=UTF-8
 encoding//csm/tools/geotool/testmain.py=UTF-8

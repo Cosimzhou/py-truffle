@@ -1,10 +1,11 @@
 #! /usr/bin/python
 # -*- coding: UTF-8 -*-
-import pygame as PYG
 from pygame.locals import *
 from sys import exit
-import time
- 
+from time import time
+
+import pygame as PYG 
+
 from csm.tools.furniture.geo import Contour, Adaptor, Point
  
 
@@ -67,7 +68,7 @@ class Application(Adaptor):
             f.write('\n')
             for c in self.content:
                 if type(c) is str:
-                    f.write("# "+str)
+                    f.write("# "+c)
                 else:
                     cnt = Contour()
                     cnt.points = c
@@ -137,11 +138,10 @@ class Application(Adaptor):
             self.content[self.contentIdx] = None
             self.contentIdxLocked = True
         
-ADT=Application(800, 600)
+ADT = Application(800, 600)
 
 # ADT.readfile("/Users/zhouzhichao/tmp/furniture.fur")
 ADT.readfile("/Users/zhouzhichao/tmp/save.fur")
-# ADT.dragStaff = Contour("1500 600 1500 600")
 ADT.draw()
 
 keymap, keytime = set(), 0
@@ -159,8 +159,8 @@ while True:
             if event.key in keymap:
                 keymap.remove(event.key)            
             
-    if keymap and time.time()-keytime > 0.2:
-        keytime = time.time()
+    if keymap and time() - keytime > 0.2:
+        keytime = time()
         pos = PYG.mouse.get_pos()
         shift = (K_LSHIFT in keymap) or (K_RSHIFT in keymap)
         if K_SPACE in keymap:
@@ -180,9 +180,6 @@ while True:
             ADT.changeFixedStaff(1 if shift else 0)
         elif K_h in keymap:
             ADT.dragFixedStaff(*pos)
-#             ADT.dragStaff = Contour()
-#             ADT.dragStaff.points = ADT.content[ADT.contentIdx]
-#             ADT.content[ADT.contentIdx] = None
         elif K_BACKSPACE in keymap:
             ADT.deleteFixedStaff()
         else:
@@ -192,6 +189,7 @@ while True:
             if K_UP in keymap: ADT.ccy += unit
             if K_DOWN in keymap: ADT.ccy -= unit
         ADT.draw()
+        
 #             elif event.key == K_w:
 #                 box.rotate(-5)
 #                 ADT.draw()
