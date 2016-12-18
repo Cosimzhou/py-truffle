@@ -197,6 +197,18 @@ class Adaptor(object):
         self.sx = self.sy = rx
     def size(self):
         return self.width, self.height
+    def distanceBetween(self, p1, p2):
+        if hasattr(p1, '__getitem__'):
+            x1, y1 = p1[0], p1[1]
+        else:
+            x1, y1 = p1.x, p1.y
+        if hasattr(p2, '__getitem__'):
+            x2, y2 = p2[0], p2[1]
+        else:
+            x2, y2 = p2.x, p2.y
+        dx = (x1 - x2) / self.sx
+        dy = (y1 - y2) / self.sy
+        return abs(Vector(dx, dy))
     def points(self, array = None, x=None,y=None):
         if array:
             if x is None: return map(self.processor, array)

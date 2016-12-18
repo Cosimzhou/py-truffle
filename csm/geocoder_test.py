@@ -28,6 +28,21 @@ def distanceCalc(x1,y1,x2,y2):
     vcos = 1.0 if vcos > 1.0 else (vcos if vcos > -1.0 else -1.0)
     return math.acos(vcos) * radiusEarth
 
+def axisLonlat(x1,y1,x2,y2):
+    """
+    地球曲面距离
+    """
+    rlon1, rlat1, rlon2, rlat2 = float(x1) * cons, float(y1) * cons, float(x2) * cons, float(y2) *cons
+    vcos = math.cos(rlat1) * math.cos(rlat2) * math.cos(rlon1 - rlon2) + math.sin(rlat1) * math.sin(rlat2)
+    vcos = 1.0 if vcos > 1.0 else (vcos if vcos > -1.0 else -1.0)
+    vsin = math.sqrt(1-vcos**2)
+    sx1, sy1, sz1 = math.cos(rlat1)*math.cos(rlon1), math.cos(rlat1)*math.sin(rlon1), math.sin(rlat1)
+    sx2, sy2, sz2 = math.cos(rlat2)*math.cos(rlon2), math.cos(rlat2)*math.sin(rlon2), math.sin(rlat2)
+    rolat = math.asin((sx1*sy2-sx2*sy1) / vsin)
+    rolon = 0
+    
+    return (rolat,rolon)
+
 def check(arg1, arg2, stat):
     stat['total'] += 1
     if arg2.get('level') is None:
