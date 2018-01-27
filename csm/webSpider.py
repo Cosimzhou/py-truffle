@@ -3,7 +3,8 @@
 
 import urllib, urllib2, cookielib
 
-filelist = ("video.aspx?Cid=58090&type=1&free=1&TagTrue=1&SecTim=2014-06-23"
+filelist = (
+ "video.aspx?Cid=58090&type=1&free=1&TagTrue=1&SecTim=2014-06-23"
 ,"video.aspx?Cid=58091&type=1&free=1&TagTrue=1&SecTim=2014-08-07"
 ,"video.aspx?Cid=58092&type=1&free=2&TagTrue=1&SecTim=2014-08-07"
 ,"video.aspx?Cid=60283&type=1&free=0&TagTrue=1&SecTim=2014-08-07"

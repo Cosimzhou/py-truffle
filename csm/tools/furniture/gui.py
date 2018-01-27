@@ -3,6 +3,7 @@
 from pygame.locals import *
 from sys import exit
 from time import time
+# import time
 
 import pygame as PYG 
 
@@ -140,8 +141,8 @@ class Application(Adaptor):
         
 ADT = Application(800, 600)
 
-# ADT.readfile("/Users/zhouzhichao/tmp/furniture.fur")
-ADT.readfile("/Users/zhouzhichao/tmp/save.fur")
+# ADT.readfile("/Users/zhichaozhou/tmp/furniture.fur")
+ADT.readfile("/Users/zhichaozhou/tmp/save.fur")
 ADT.draw()
 
 keymap, keytime = set(), 0
@@ -149,7 +150,7 @@ while True:
     PYG.display.update()
     for event in PYG.event.get():
         if event.type == QUIT:
-            ADT.writefile("/Users/zhouzhichao/tmp/save.fur")
+            ADT.writefile("/Users/zhichaozhou/tmp/save.fur")
             exit()
         if event.type == MOUSEMOTION:
             ADT.draw()

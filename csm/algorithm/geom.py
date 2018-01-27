@@ -1,7 +1,7 @@
 #coding: utf-8
 
 import math
-earth_redius=6371004
+earth_radius=6371004
 cons = math.pi/180
 
 def arc_points(p1,p2):
@@ -13,10 +13,10 @@ def arc_points(p1,p2):
     
 def ll2xyz(p):
     x, y = p[0]*cons, p[1]*cons
-    return (math.sin(x)*math.cos(y)*earth_redius, math.cos(x)*math.cos(y)*earth_redius, math.sin(y)*earth_redius)
+    return (math.sin(x)*math.cos(y)*earth_radius, math.cos(x)*math.cos(y)*earth_radius, math.sin(y)*earth_radius)
 
 def xyz2ll(p):
-    x, y, z = p[0]/earth_redius, p[1]/earth_redius, p[2]/earth_redius
+    x, y, z = p[0]/earth_radius, p[1]/earth_radius, p[2]/earth_radius
     lat = math.asin(z)
     lng = math.asin(x/math.cos(lat))
     

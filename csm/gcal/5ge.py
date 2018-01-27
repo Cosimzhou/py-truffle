@@ -561,7 +561,7 @@ def cal5ge(surname, name):
     return (tianGe, renGe, diGe, waiGe, zongGe)
     
 if __name__ == '__main__':
-    name = '張芃熙'#翕'
+    name = '周子彧'#'張芃熙'#翕'
     grp = c5geCal(name)
     print name
     print grp
@@ -578,5 +578,5 @@ if __name__ == '__main__':
             print yun,
     print 
     
-    c5bihuaCal('張')
+#    c5bihuaCal('張')
 #     pass

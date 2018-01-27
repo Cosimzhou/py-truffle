@@ -168,6 +168,12 @@ if __name__ == '__main__':
     j = JDate()
     j.J2000= 5543.246366439924#5558.280284798731#5530
     print j
+    
+    
+    m1st = JDate(2014,12,20)
+    print "今天是第%d天"%(int(today.julian - m1st.julian) + 1)
+    
+    
 #     print datetime.datetime.now().date().year
 #  
 #   DD2str:function(r){ #日期转为串

@@ -1,37 +1,36 @@
-#coding: UTF-8
+# -*- coding: UTF-8 -*-
 
-from math import pi as TK_PI
-from math import sqrt, asin, acos, sin, cos, tan, log, exp, fabs
+from math import pi, sqrt, asin, acos, sin, cos, tan, log, exp, fabs
 
 TK_MERCATOR_MAX=24
 TK_RADIUS_EARTH=6371004 # meters
-TK_RADIAN_PER_DEGREE=TK_PI/180 # use to transfer unit system from degree to radian
+TK_RADIAN_PER_DEGREE=pi/180 # use to transfer unit system from degree to radian
 TK_TOP_RANGE=3686400.0
 
 def _tk_gps_yj5(x, y):
     return  300 + x + 2*y + 0.1*x*x + 0.1*x*y + 0.1*sqrt(sqrt(x * x))   \
-                + 20 *(sin(6*TK_PI * x) + sin(2*TK_PI * x)) * 0.6667    \
-                + 20 * (sin(TK_PI * x) + 2*sin(TK_PI/3 * x)) * 0.6667   \
-                + 150 * (sin(TK_PI/12 * x) + 2*sin(TK_PI/30 * x)) * 0.6667
+                + 20 *(sin(6*pi * x) + sin(2*pi * x)) * 0.6667    \
+                + 20 * (sin(pi * x) + 2*sin(pi/3 * x)) * 0.6667   \
+                + 150 * (sin(pi/12 * x) + 2*sin(pi/30 * x)) * 0.6667
 
 def _tk_gps_yjy5(x, y):
     return -100 + 2*x + 3*y + 0.2*y*y + 0.1*x*y + 0.2*sqrt(sqrt(x*x))   \
-                + 20 * (sin(6*TK_PI * x) + sin(2*TK_PI * x)) * 0.6667   \
-                + 20 * (sin(TK_PI * y) + 2*sin(TK_PI/3 * y)) * 0.6667   \
-                + 160 * (sin(TK_PI/12 * y) + 2*sin(TK_PI/30 * y)) * 0.6667
+                + 20 * (sin(6*pi * x) + sin(2*pi * x)) * 0.6667   \
+                + 20 * (sin(pi * y) + 2*sin(pi/3 * y)) * 0.6667   \
+                + 160 * (sin(pi/12 * y) + 2*sin(pi/30 * y)) * 0.6667
 
 def _tk_gps_jy5(x, xx):
     a = 6378245
     e = 0.00669342
     n = sqrt(1 - e * (sin(x*TK_RADIAN_PER_DEGREE) ** 2))
-    return (xx * 180) / (a / n * cos(x * TK_RADIAN_PER_DEGREE) * TK_PI) 
+    return (xx * 180) / (a / n * cos(x * TK_RADIAN_PER_DEGREE) * pi) 
 
 def _tk_gps_jyj5(x, yy):
     a = 6378245
     e = 0.00669342
     mm = 1 - e * (sin(x*TK_RADIAN_PER_DEGREE) ** 2)
     m = (a * (1 - e)) / (mm * sqrt(mm))
-    return (yy * 180) / (m * TK_PI)
+    return (yy * 180) / (m * pi)
      
 """
     偏移方法： WSG84->GCJ02
@@ -57,19 +56,19 @@ def tk_gps_latlon_transform_reverse(lon, lat):
     x = lon - 105.0
     y = lat - 35.0
     dLat = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * sqrt(fabs(x))
-    dLat += (20.0 * sin(6.0 * x * TK_PI) + 20.0 * sin(2.0 * x * TK_PI)) * 2.0 / 3.0
-    dLat += (20.0 * sin(y * TK_PI) + 40.0 * sin(y / 3.0 * TK_PI)) * 2.0 / 3.0
-    dLat += (160.0 * sin(y / 12.0 * TK_PI) + 320 * sin(y * TK_PI / 30.0)) * 2.0 / 3.0
+    dLat += (20.0 * sin(6.0 * x * pi) + 20.0 * sin(2.0 * x * pi)) * 2.0 / 3.0
+    dLat += (20.0 * sin(y * pi) + 40.0 * sin(y / 3.0 * pi)) * 2.0 / 3.0
+    dLat += (160.0 * sin(y / 12.0 * pi) + 320 * sin(y * pi / 30.0)) * 2.0 / 3.0
     dLon = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * sqrt(fabs(x))
-    dLon += (20.0 * sin(6.0 * x * TK_PI) + 20.0 * sin(2.0 * x * TK_PI)) * 2.0 / 3.0
-    dLon += (20.0 * sin(x * TK_PI) + 40.0 * sin(x / 3.0 * TK_PI)) * 2.0 / 3.0
-    dLon += (150.0 * sin(x / 12.0 * TK_PI) + 300.0 * sin(x / 30.0 * TK_PI)) * 2.0 / 3.0
-    radLat = lat / 180.0 * TK_PI
+    dLon += (20.0 * sin(6.0 * x * pi) + 20.0 * sin(2.0 * x * pi)) * 2.0 / 3.0
+    dLon += (20.0 * sin(x * pi) + 40.0 * sin(x / 3.0 * pi)) * 2.0 / 3.0
+    dLon += (150.0 * sin(x / 12.0 * pi) + 300.0 * sin(x / 30.0 * pi)) * 2.0 / 3.0
+    radLat = lat / 180.0 * pi
     magic = sin(radLat)
     magic = 1 - ee * magic * magic
     sqrtMagic = sqrt(magic)
-    dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * TK_PI)
-    dLon = (dLon * 180.0) / (a / sqrtMagic * cos(radLat) * TK_PI)
+    dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * pi)
+    dLon = (dLon * 180.0) / (a / sqrtMagic * cos(radLat) * pi)
     out_lat = lat - dLat
     out_lon = lon - dLon
     return out_lon, out_lat
@@ -82,8 +81,8 @@ def tk_lonlat_to_mercxy(lon, lat, lv):
     
     multiplyFactor = 1L << (lv + 8)
     merc_x = int(round(lon + 180.0) / 360.0 * multiplyFactor)
-    siny = sin(lat * TK_PI / 180.0)
-    merc_y = int(round((0.5 - log((1 + siny) / (1 - siny)) / 4.0 / TK_PI)) * multiplyFactor)
+    siny = sin(lat * pi / 180.0)
+    merc_y = int(round((0.5 - log((1 + siny) / (1 - siny)) / 4.0 / pi)) * multiplyFactor)
     return merc_x, merc_y
 
 def tk_mercxy_to_lonlat(merc_x, merc_y, lv):
@@ -93,7 +92,7 @@ def tk_mercxy_to_lonlat(merc_x, merc_y, lv):
     
     multiplyFactor = 1 << (lv + 8)
     return  (merc_x * 360.0 / multiplyFactor - 180.0,
-        asin(1.0 - 2.0 / (1 + exp(2.0 * TK_PI * (1 - merc_y / multiplyFactor * 2)))) / TK_PI * 180.0)
+        asin(1.0 - 2.0 / (1 + exp(2.0 * pi * (1 - merc_y / multiplyFactor * 2)))) / pi * 180.0)
 
 """
     地球曲面距离
