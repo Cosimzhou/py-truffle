@@ -7,7 +7,7 @@ from time import time
 
 import pygame as PYG 
 
-from csm.tools.furniture.geo import Contour, Adaptor, Point
+from csm.tools.furniture.geo import Vector, Contour, Adaptor, Point
  
 
 class Application(Adaptor):
@@ -16,12 +16,14 @@ class Application(Adaptor):
         self.content = []
         self.buff = []
         self.dragStaff = None
+        self.rulerPoint = None
         self.buffIdx = 0
         self.contentIdx = -1
         self.contentIdxLocked = False
         
         # xxxxxxx
         PYG.init()
+        self.font = PYG.font.Font(None, 20)
         self.screen = PYG.display.set_mode(self.size(), 0, 32) 
         self.screen.fill(0xffffff00)
         
@@ -37,6 +39,11 @@ class Application(Adaptor):
         if self.dragStaff:
             pos = PYG.mouse.get_pos()
             PYG.draw.lines(self.screen, 0xff000000, True, self.points(self.dragStaff.points, *pos), 1)
+        if self.rulerPoint:
+            pos = PYG.mouse.get_pos()
+            PYG.draw.lines(self.screen, 0x0000ff00, True, (self.rulerPoint, pos), 1)
+            dis = self.distanceBetween(self.rulerPoint, pos)
+            self.screen.blit(self.font.render("%f"%dis, True, (255,0,0)), (pos[0]+20,pos[1]))
 
     def readfile(self, fpath):
         furno, fixed, comment = 0, True, ''
@@ -138,13 +145,33 @@ class Application(Adaptor):
             self.dragStaff = cnt
             self.content[self.contentIdx] = None
             self.contentIdxLocked = True
-        
-ADT = Application(800, 600)
+    def transZoom(self, func):
+        if self.rulerPoint:
+            p = self.rossecorp(Point(*self.rulerPoint))
+        func()
+        if self.rulerPoint:
+            p = self.processor(p)
+            self.rulerPoint = (p.x, p.y)
+            
+            
+ADT = Application(1024, 720)
 
 # ADT.readfile("/Users/zhichaozhou/tmp/furniture.fur")
 ADT.readfile("/Users/zhichaozhou/tmp/save.fur")
 ADT.draw()
 
+def zoomInFunc():
+    ADT.sx *= 1.1
+    ADT.sy *= 1.1
+def zoomOutFunc():    
+    ADT.sx /= 1.1
+    ADT.sy /= 1.1
+def moveZoomFunc(keymap, unit):
+    if K_LEFT in keymap: ADT.ccx += unit
+    if K_RIGHT in keymap: ADT.ccx -= unit 
+    if K_UP in keymap: ADT.ccy += unit
+    if K_DOWN in keymap: ADT.ccy -= unit
+    
 keymap, keytime = set(), 0
 while True:
     PYG.display.update()
@@ -167,11 +194,9 @@ while True:
         if K_SPACE in keymap:
             ADT.setDragStaff(*pos)
         elif K_EQUALS in keymap:
-            ADT.sx *= 1.1
-            ADT.sy *= 1.1
-        elif K_MINUS in keymap:        
-            ADT.sx /= 1.1
-            ADT.sy /= 1.1
+            ADT.transZoom(zoomInFunc)
+        elif K_MINUS in keymap:     
+            ADT.transZoom(zoomOutFunc)   
         elif K_r in keymap:
             if ADT.dragStaff: ADT.dragStaff.rotate(5 if shift else -5)
         elif K_n in keymap:
@@ -183,12 +208,11 @@ while True:
             ADT.dragFixedStaff(*pos)
         elif K_BACKSPACE in keymap:
             ADT.deleteFixedStaff()
+        elif K_l in keymap:
+            ADT.rulerPoint = None if ADT.rulerPoint else pos
         else:
             unit = 10 if shift else 30
-            if K_LEFT in keymap: ADT.ccx += unit
-            if K_RIGHT in keymap: ADT.ccx -= unit 
-            if K_UP in keymap: ADT.ccy += unit
-            if K_DOWN in keymap: ADT.ccy -= unit
+            ADT.transZoom(lambda:moveZoomFunc(keymap, unit))
         ADT.draw()
         
 #             elif event.key == K_w:

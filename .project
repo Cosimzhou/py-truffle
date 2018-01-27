@@ -3,6 +3,7 @@
 	<name>tmpWork</name>
 	<comment></comment>
 	<projects>
+		<project>pypro</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
