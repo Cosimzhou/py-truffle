@@ -228,34 +228,68 @@ class board(object):
             
 
     def __repr__(self):
-        text = "┌─────────┐\n"
+        #return self.printOutMemory()
+        text = "┌────────────┐\n"
         line1, line2='',''
-        for y in xrange(len(self.board)):
-            for x in xrange(len(self.board[y])):
-                if self.board[y][x] == CAO:
-                    line1 += "┌─"
-                    line2 += "│ "
+        x, y = 0, 0
+        while y < CY:
+            line1 = "│"
+            line2 = "│"
+            y+= 1
+            x = 1
+            while x <= CX:
+                if self.board[y][x] == NIL:
+                    line1 += "   "
+                    line2 += "   "
                 elif self.board[y][x] == WALL:
-                    text += "*"
+                    raise Exception("unexpected wall appears in inner area(%d,%d)."%(y,x))
+                elif self.board[y][x] == CAO:
+                    if self.board[y-1][x] == self.board[y][x]:
+                        line1 += "│    │"
+                        line2 += "└────┘"
+                    else:
+                        line1 += "┌────┐"
+                        line2 += "│    │"
+                    x += 1
                 elif PAWN <= self.board[y][x] < WALL:
-                    text += 'o'
+                    line1 += "┌─┐"
+                    line2 += "└─┘"
                 elif HORI_SAT <= self.board[y][x] < PAWN:
-                    text += '='
+                    line1 += "┌────┐"
+                    line2 += "└────┘"
+                    x += 1
                 elif VERT_SAT <= self.board[y][x] < HORI_SAT:
-                    text += 'H'
+                    if self.board[y-1][x] != self.board[y][x]:
+                        line1 += "┌─┐"
+                        line2 += "│ │"
+                    else:
+                        line1 += "│ │"
+                        line2 += "└─┘"
                 else:
-                    text += ' '
-            text += '\n'
-        return text    
-#         text += "└─┐    ┌─┘"
+                    raise Exception("unknown block(%d,%d)."%(y,x))
+                x += 1
+
+            line1 += "│"
+            line2 += "│"
+            text += '%s\n%s\n'%(line1, line2)
+        text += "└──┐      ┌──┘"
+        return text
 # """
 # ┌─┬┐
 # │
 # ├┼┤
 # └┴┘
 # """
-        
-    
+
+    def printOutMemory(self):
+        text = ""
+        for y in xrange(len(self.board)):
+            for x in xrange(len(self.board[y])):
+                text += "%02x"%(int(self.board[y][x]))
+                continue
+            text += '\n'
+        return text
+
     def isChm(self, x, y):
         return CAO<= self.board[y][x] < WALL
     
