@@ -1,10 +1,43 @@
-#coding: UTF-8
+#! /usr/bin/python
+# -*- coding: UTF-8 -*-
 
-CX, CY = 4, 5
-NIL, WALL, CAO, VERT_SAT, HORI_SAT, PAWN = 0, 255, 1, 32, 64, 128 
+#########################################################################
+# File Name: man.py
+# Author: cosim
+# mail: cosimzhou@hotmail.com
+# Created Time: 一  5/15 15:12:23 2015
+#########################################################################
+
+class Const():
+    """
+           3
+           ^
+           |
+      1 <--+--> 0
+           |
+           V
+           2
+    """
+
+    CX, CY = 4, 5
+    UX, UY = CX+1, CY+1
+    WX, WY = CX+2, CY+2
+    U2X, U2Y = UX<<1, UY<<1
+    ALL_LEN = UX*WY+1
+    NIL, WALL, CAO, VERT_SAT, HORI_SAT, PAWN = 0, 0xff, 0x01, 0x20, 0x40, 0x80
+    BEGIN, END = WX, UY*UX
+    DIR_DIFF = (1, -1, UX, -UX, 2, -2, U2X, -U2X)
+    HORI_DOUBLE = set((VERT_SAT, CAO))
+    HORI_SINGLE = set((HORI_SAT, PAWN))
+    VERT_DOUBLE = set((HORI_SAT, CAO))
+    VERT_SINGLE = set((VERT_SAT, PAWN))
+
+    @staticmethod
+    def type(v):
+        return Const.CAO if v == Const.CAO else (v & 0xe0)
 
 data = \
-(    
+(
     (94,3, "鱼游春水", "14402202131122213042400"),
     (126,4, "数字系列之7", "34231223320302113021400"),
     (71,3, "伏羲八卦:天雷无妄", "14400223223330203042410"),
@@ -113,7 +146,7 @@ data = \
     (49,2, "扰敌之策", "44122320313303102122410"),
     (138,4, "峰回路转", "34230213200102014132401"),
     (39,1, "伏羲八卦:风水涣", "1630022320414243402032310"),
-    (70,3, "伏羲八卦:地山谦", "44103132333000102122210"),
+    (70,3, "伏羲八卦:地山谦", "44103132333000102122210"),
     (109,4, "小汽车", "34200110310201334231421"),
     (83,3, "伏羲八卦:火山旅", "24323330001031302220410"),
     (42,1, "前挡后阻", "34221021231322333201400"),
@@ -158,7 +191,7 @@ data = \
     (38,1, "四橫定式D", "14400101121312002030422"),
     (19,0, "单兵种的没落", "54000102131232030331402"),
     (65,2, "三橫定式A", "24302333031122422130400"),
-    (42,1, "伏羲八卦:水火既济", "083013102122333041422032410"),
+    (42,1, "伏羲八卦:水火既济", "083013102122333041422032410"),
     (122,4, "冯京马涼", "24302333021311222130400"),
     (50,2, "一字长蛇2", "24321232030313202030400"),
     (28,0, "蝴蝶花", "4600030023212221323043410"),
@@ -188,90 +221,138 @@ data = \
 )
 
 
-class board(object):
+class Board(object):
     def __init__(self):
-        self.board = [[0]*(CX+2) for _ in xrange(CY+2)]
-        for i in xrange(len(self.board)):
-            self.board[i][0] = self.board[i][-1] = WALL
-        for i in xrange(len(self.board[0])):
-            self.board[0][i] = self.board[-1][i] = WALL
-            
-    def set_board_by_string(self, string):
-        if len(string) < 3: return
-        plrs = [int(string[0]), int(string[1]), int(string[2])]
-        idxs = VERT_SAT, PAWN, HORI_SAT, 0
-        i, j, k = 3, 0, VERT_SAT
-        while i < len(string):
-            while j < 3 and plrs[j] == 0:
-                j += 1
-                k = idxs[j]
-            
-            x, y = int(string[i])+1, int(string[i+1])+1     
-            i += 2           
-            if j == 3:
-                self.board[y][x] = CAO
-                self.board[y+1][x] = CAO
-                self.board[y][x+1] = CAO
-                self.board[y+1][x+1] = CAO
-                break
-            
-            plrs[j] -= 1
-            if j == 0:
-                self.board[y][x] = k
-                self.board[y+1][x] = k
-            elif j == 1:
-                self.board[y][x] = k
-            else:
-                self.board[y][x] = k
-                self.board[y][x+1] = k
-            k += 1
-            
+        self.clear()
 
     def __repr__(self):
         #return self.printOutMemory()
-        text = "┌────────────┐\n"
-        line1, line2='',''
-        x, y = 0, 0
-        while y < CY:
-            line1 = "│"
-            line2 = "│"
-            y+= 1
-            x = 1
-            while x <= CX:
-                if self.board[y][x] == NIL:
-                    line1 += "   "
-                    line2 += "   "
-                elif self.board[y][x] == WALL:
-                    raise Exception("unexpected wall appears in inner area(%d,%d)."%(y,x))
-                elif self.board[y][x] == CAO:
-                    if self.board[y-1][x] == self.board[y][x]:
-                        line1 += "│    │"
-                        line2 += "└────┘"
-                    else:
-                        line1 += "┌────┐"
-                        line2 += "│    │"
-                    x += 1
-                elif PAWN <= self.board[y][x] < WALL:
-                    line1 += "┌─┐"
-                    line2 += "└─┘"
-                elif HORI_SAT <= self.board[y][x] < PAWN:
-                    line1 += "┌────┐"
-                    line2 += "└────┘"
-                    x += 1
-                elif VERT_SAT <= self.board[y][x] < HORI_SAT:
-                    if self.board[y-1][x] != self.board[y][x]:
-                        line1 += "┌─┐"
-                        line2 += "│ │"
-                    else:
-                        line1 += "│ │"
-                        line2 += "└─┘"
-                else:
-                    raise Exception("unknown block(%d,%d)."%(y,x))
-                x += 1
+        return self.printGraphic()
+        return self.printPosIndex()
 
-            line1 += "│"
-            line2 += "│"
-            text += '%s\n%s\n'%(line1, line2)
+    @staticmethod
+    def encode_pos(x, y):
+        return (y+1)*Const.UX + (x+1)
+    @staticmethod
+    def decode_pos(pos):
+        return  (pos%Const.UX)-1, (pos//Const.UX)-1
+
+    def clear(self):
+        self.__board = [0]*Const.ALL_LEN
+        self.__pieces = {} #piece positions, CC is in the first pit
+        self.__pits = {i for i in xrange(Const.ALL_LEN)}
+        self.set_wall()
+
+    def set_wall(self):
+        top = Const.UX*Const.UY
+        for i in xrange(Const.UX):
+            self.__board[i] = Const.WALL
+            self.__board[i+top] = Const.WALL
+            self.__pits.remove(i)
+            self.__pits.remove(i+top)
+        for i in xrange(1, Const.UY):
+            self.__board[i*Const.UX] = Const.WALL
+            self.__pits.remove(i*Const.UX)
+        self.__board[-1] = Const.WALL
+        self.__pits.remove(len(self.__board)-1)
+
+    def get_string_from_board(self):
+        dic = {}
+        for k, v in self.__pieces.items():
+            k = Const.type(k)
+            if k not in dic:
+                dic[k] = ''
+            dic[k] += "%d%d"%Board.decode_pos(v)
+        text = "%d%d%d"%(len(dic.get(Const.VERT_SAT))/2,len(dic.get(Const.PAWN))/2,len(dic.get(Const.HORI_SAT))/2)
+        text+= "".join((dic.get(Const.VERT_SAT, ""), dic.get(Const.PAWN, ""), dic.get(Const.HORI_SAT, ""), dic.get(Const.CAO, "")))
+        return text
+
+    def set_board_by_string(self, string):
+        if len(string) < 3:
+            return
+        self.clear()
+        occupy = set()
+        plrs = [int(string[0]), int(string[1]), int(string[2])]
+        idxs = Const.VERT_SAT, Const.PAWN, Const.HORI_SAT, 0
+        i, man, man_id = 3, 0, Const.VERT_SAT
+        while i < len(string):
+            while man < 3 and plrs[man] == 0:
+                man += 1
+                man_id = idxs[man]
+
+            pos = Board.encode_pos(int(string[i]), int(string[i+1]))
+            i += 2
+            if man == 3:
+                self.__board[pos] = \
+                self.__board[pos+1] = \
+                self.__board[pos+Const.UX] = \
+                self.__board[pos+Const.WX] = Const.CAO
+                self.__pieces[Const.CAO] = pos
+                occupy.add(pos)
+                occupy.add(pos+1)
+                occupy.add(pos+Const.UX)
+                occupy.add(pos+Const.WX)
+                break
+
+            plrs[man] -= 1
+            self.__pieces[man_id] = pos
+            self.__board[pos] = man_id
+            occupy.add(pos)
+            if man == 0:
+                self.__board[pos+Const.UX] = man_id
+                occupy.add(pos+Const.UX)
+            elif man == 1:
+                pass
+            else:
+                self.__board[pos+1] = man_id
+                occupy.add(pos+1)
+            man_id += 1
+        self.__pits -= occupy
+        assert len(self.__pits) == 2
+
+    def printGraphic(self):
+        text = "┌────────────┐\n"
+        line1 = "│"
+        line2 = "│"
+        x, end = Const.BEGIN, Const.END
+        while x <= end:
+            if self.__board[x] == Const.WALL:
+                if x % Const.UX:
+                    raise Exception("unexpected wall appears in inner area(%d,%d)."%(y,x))
+                line1 += "│"
+                line2 += "│"
+                text += '%s\n%s\n'%(line1, line2)
+                line1 = "│"
+                line2 = "│"
+            elif self.__board[x] == Const.NIL:
+                line1 += "   "
+                line2 += "   "
+            elif self.__board[x] == Const.CAO:
+                if self.__board[x-Const.UX] != self.__board[x]:
+                    line1 += "┌────┐"
+                    line2 += "│ \/ │"
+                else:
+                    line1 += "│ /\ │"
+                    line2 += "└────┘"
+                x += 1
+            elif Const.PAWN <= self.__board[x] < Const.WALL:
+                line1 += "┌─┐"
+                line2 += "└─┘"
+            elif Const.HORI_SAT <= self.__board[x] < Const.PAWN:
+                line1 += "┌────┐"
+                line2 += "└────┘"
+                x += 1
+            elif Const.VERT_SAT <= self.__board[x] < Const.HORI_SAT:
+                if self.__board[x-Const.UX] != self.__board[x]:
+                    line1 += "┌─┐"
+                    line2 += "│ │"
+                else:
+                    line1 += "│ │"
+                    line2 += "└─┘"
+            else:
+                raise Exception("unknown block(%d)."%x)
+            x += 1
+
         text += "└──┐      ┌──┘"
         return text
 # """
@@ -281,35 +362,269 @@ class board(object):
 # └┴┘
 # """
 
-    def printOutMemory(self):
+    def printMemory(self):
         text = ""
-        for y in xrange(len(self.board)):
-            for x in xrange(len(self.board[y])):
-                text += "%02x"%(int(self.board[y][x]))
+        for i, c in enumerate(self.__board):
+            text += "%02x"%c
+            if i % Const.UX < Const.CX:
+                continue
+            text += '\n'
+        text += " "*(Const.CX*2)
+        return text
+
+    def printPosIndex(self):
+        text = ""
+        for i, _ in enumerate(self.__board):
+            text += "%02d "%i
+            if i % Const.UX < Const.CX:
                 continue
             text += '\n'
         return text
+    def printMD(self):
+        dic = {}
+        for k, v in self.__pieces.items():
+            k = Const.type(k)
+            if k not in dic: dic[k] = []
+            dic[k].append(v)
+        for k in dic:
+            dic[k].sort()
+        ks = sorted(dic.keys())
+        return ''.join(map(lambda x:chr(59+x), reduce(lambda x, y:x+y, map(lambda x:dic[x], ks))))
+
+    def info(self):
+        texts1 = self.printGraphic().split("\n")
+        texts2 = self.printMemory().split("\n")
+        texts3 = self.printPosIndex().split("\n")
+        for i, l in enumerate(texts2):
+            texts1[i] += "| "+ l
+        for i, l in enumerate(texts3):
+            texts1[i] += "| " + l
+        texts1[Const.WY+1] += '-'*(Const.WX*5)
+        texts1[Const.WY+2] += str(self.__pits) + ":" + self.printMD() +" = "+ self.get_string_from_board()
+        texts1[Const.WY+3] += str(self.__pieces)
+
+        return "\n".join(texts1)
+
 
     def isChm(self, x, y):
-        return CAO<= self.board[y][x] < WALL
-    
+        return Const.CAO <= self.__board[y][x] < Const.WALL
+    def _isChm(self, x):
+        return Const.CAO <= self.__board[x] < Const.WALL
+
     def opEnum(self):
-        for y in xrange(1, CY):
-            for x in xrange(1, CX):
-                if self.board[y][x] == NIL:
-#                     if self.isChm(y, x-1) and ((self.board[y-1][x-1] == self.board[y][x-1] and self.board[y-1][x-1]==NIL) or (self.board[y+1][x-1] == self.board[y][x-1] and self.board[y+1][x-1]==NIL)):
-#                         yield (0)
-#                         pass
-#                     if self.isChm(y, x+1):
-                        pass
-        pass
-            
-class op(object):
-    def __init__(self):
+        """
+               3
+               ^
+               |
+          1 <--+--> 0
+               |
+               V
+               2
+        """
+        for x in self.__pits:
+            assert self.__board[x] == Const.NIL
+
+            # whether left man can move right
+            left_man = self.__board[x-1]
+            left_man_type = Const.type(left_man)
+            left_pos = self.__pieces.get(left_man)
+            if left_pos:
+                if left_man_type in Const.HORI_SINGLE:
+                    yield [left_pos], [x], 0, left_man
+                elif self.__board[x+Const.UX] == Const.NIL:
+                    if left_pos == x-2 and left_man_type == Const.CAO:
+                        yield [left_pos, left_pos+Const.UX], [x,x+Const.UX], 0, left_man
+                    if left_pos == x-1 and left_man_type == Const.VERT_SAT:
+                        yield [left_pos, left_pos+Const.UX], [x,x+Const.UX], 0, left_man
+#            elif left_man == Const.NIL:
+#                left_man = self.__board[x-2]
+#                left_man_type = Const.type(left_man)
+#                if left_man_type in Const.HORI_SINGLE:
+#                    left_pos = self.__pieces.get(left_man)
+#                    if left_pos:
+#                        yield left_pos, x, 4, left_man
+
+            # whether right man can move left
+            right_man = self.__board[x+1]
+            right_man_type = Const.type(right_man)
+            right_pos = self.__pieces.get(right_man)
+            if right_pos:
+                if right_man_type in Const.HORI_SINGLE:
+                    if right_man_type == Const.PAWN:
+                        yield [right_pos], [x], 1, right_man
+                    elif right_man_type == Const.HORI_SAT:
+                        yield [right_pos+1], [x], 1, right_man
+                elif self.__board[x+Const.UX] == Const.NIL:
+                    if right_pos == x+1 and right_man_type == Const.VERT_SAT:
+                        yield [right_pos, right_pos+Const.UX], [x,x+Const.UX], 1, right_man
+                    elif right_pos == x+1 and right_man_type == Const.CAO:
+                        yield [right_pos+1, right_pos+Const.WX], [x,x+Const.UX], 1, right_man
+#            elif right_man == Const.NIL:
+#                right_man = self.__board[x+2]
+#                right_man_type = Const.type(right_man)
+#                if right_man_type in Const.HORI_SINGLE:
+#                    right_pos = self.__pieces.get(right_man)
+#                    if right_pos:
+#                        yield right_pos, x, 5, right_man
+
+
+            # whether upper man can move down
+            upper_man = self.__board[x-Const.UX]
+            upper_man_type = Const.type(upper_man)
+            upper_pos = self.__pieces.get(upper_man)
+            if upper_pos:
+                if upper_man_type in Const.VERT_SINGLE:
+                    yield [upper_pos], [x], 2, upper_man
+                elif self.__board[x+1] == Const.NIL:
+                    if upper_pos == x-Const.U2X and upper_man_type == Const.CAO:
+                        yield [upper_pos, upper_pos+1], [x,x+1], 2, upper_man
+                    elif upper_pos == x-Const.UX and upper_man_type == Const.HORI_SAT:
+                        yield [upper_pos, upper_pos+1], [x,x+1], 2, upper_man
+#            elif upper_man == Const.NIL:
+#                upper_man = self.__board[x-Const.U2X]
+#                upper_man_type = Const.type(upper_man)
+#                if upper_man_type in Const.VERT_SINGLE:
+#                    upper_pos = self.__pieces.get(upper_man)
+#                    if upper_pos:
+#                        yield upper_pos, x, 6, upper_man
+
+            # whether lower man can move up
+            lower_man = self.__board[x+Const.UX]
+            lower_man_type = Const.type(lower_man)
+            lower_pos = self.__pieces.get(lower_man)
+            if lower_pos:
+                if lower_man_type in Const.VERT_SINGLE:
+                    if lower_man_type == Const.PAWN:
+                        yield [lower_pos], [x], 3, lower_man
+                    elif lower_man_type == Const.VERT_SAT:
+                        yield [lower_pos+Const.UX], [x], 3, lower_man
+                elif self.__board[x+1] == Const.NIL:
+                    if lower_pos == x+Const.UX and lower_man_type == Const.CAO:
+                        yield [lower_pos+Const.UX, lower_pos+Const.WX], [x,x+1], 3, lower_man
+                    elif lower_pos == x+Const.UX and lower_man_type == Const.HORI_SAT:
+                        yield [lower_pos, lower_pos+1], [x, x+1], 3, lower_man
+#            elif lower_man == Const.NIL:
+#                lower_man = self.__board[x+Const.U2X]
+#                lower_man_type = Const.type(lower_man)
+#                if lower_man_type in Const.VERT_SINGLE:
+#                    lower_pos = self.__pieces.get(lower_man)
+#                    if lower_pos:
+#                        yield lower_pos, x, 7, lower_man
+
+    def do(self, op):
+        for p in op.origin:
+            self.__board[p] = Const.NIL
+            self.__pits.add(p)
+        for p in op.dest:
+            self.__board[p] = op.man_id
+            self.__pits.remove(p)
+        self.__pieces[op.man_id] += Const.DIR_DIFF[op.direct]
+
+    def undo(self, op):
+        for p in op.origin:
+            self.__board[p] = op.man_id
+            self.__pits.remove(p)
+        for p in op.dest:
+            self.__board[p] = Const.NIL
+            self.__pits.add(p)
+        self.__pieces[op.man_id] -= Const.DIR_DIFF[op.direct]
+
+class Operation(object):
+    __slots__ = "origin dest direct man_id".split()
+    def __init__(self, orig_pos, dest_pos, direct, man_id):
+        self.origin = orig_pos
+        self.dest = dest_pos
+        self.direct = direct
+        self.man_id = man_id
+    def __repr__(self):
+        return "(%s->%s, %d, %d)"%(str(self.origin), str(self.dest), self.direct, self.man_id)
+
+class Tree(object):
+    __slots__ = "parent value children depth history".split()
+    def __init__(self, val=None):
+        self.parent = None
+        self.children = []
+        self.value = val
+        self.depth = 0
+        self.history = set()
+    def __repr__(self):
+        return "%d.%s %s:%s"%(self.depth, self.value, ",".join(map(lambda x:str(x.value), self.children)), ",".join(self.history))
+    def adopt(self, child):
+        self.children.append(child)
+        child.depth = self.depth + 1
+        child.parent = self
+        child.history.update(self.history)
+
+class Game(object):
+    def __init__(self, opening = None):
+        self.base = Board()
+        self.tree = []
+        self.visited = set()
+        self.root_op = Tree()
+        self.limit = 150
+        if opening is not None:
+            self.limit = data[opening][0]*2
+            self.base.set_board_by_string(data[opening][3])
+            self.visited.add(self.base.printMD())
+
+    def gen_operations(self):
+        ops = []
+        for i in self.base.opEnum():
+            ops.append(Operation(*i))
+        return ops
+
+    def search(self):
+        try:
+            print self.travel(self.root_op)
+        except KeyboardInterrupt:
+            print
+            print self.base.info()
+
+    def travel(self, rop):
+        ops = self.gen_operations()
+        ret = False
+        print self.base.info()
+        for op in ops:
+            self.base.do(op)
+            md = self.base.printMD()
+            if md[0] == "Q":
+                print md
+                ret = True
+            #elif md not in rop.history and rop.depth < self.limit:
+            elif md not in self.visited and rop.depth < self.limit:
+                r = Tree(op)
+                rop.adopt(r)
+                self.visited.add(md)
+                #r.history.add(md)
+            self.base.undo(op)
+            if ret: return ret
+        print rop
+
+        for r in rop.children:
+            self.base.do(r.value)
+            ret = self.travel(r)
+            self.base.undo(r.value)
+            if ret: return ret
+        rop.children = []
+        return False
+
+    def show(self):
+        print self.base
+
+    def do_opera(self):
         pass
 
 if __name__ == '__main__':
-    b = board()
-    b.set_board_by_string("182000212223204142434032310")
-    print b
-    pass
+    g = Game(4)
+#    g.base.set_board_by_string("14433030414130100022220")
+#    print g.base.info()
+#    print g.gen_operations()
+    g.search()
+#    print g.base.info()
+#    ops = []
+#    for i in g.base.opEnum():
+#        ops.append(Operation(*i))
+#
+#    g.base.do(ops[0])
+#    print g.base.info()
+    #g.show()
